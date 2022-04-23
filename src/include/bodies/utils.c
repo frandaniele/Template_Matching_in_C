@@ -5,20 +5,42 @@ void error(char *msj){
     exit(EXIT_FAILURE);
 }
 
-void get_pixels(char * img_path){
-    char *const args[] = {"src/img_to_dots.py", NULL};
+int **read_image_pixels(char * img_path, int *size_x, int *size_y){
+    FILE * fp;
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
 
-    pid_t pid = fork();
-        switch(pid){
-            case -1:
-                perror("Fork");
-                exit(EXIT_FAILURE);
-            case 0:
-                execvp(args[0], args);
+    if ((fp = fopen(img_path, "r")) == NULL)
+        error("fopen");
 
-                perror("execvp");
-                exit(EXIT_FAILURE);
-            default:
-                printf("Se obtuvieron los pixeles de la imagen %s\n", img_path);
+    getline(&line, &len, fp);
+    char *ptr = strtok(line, " ");
+    size_t xdim = (size_t) atoi(ptr);
+    *size_x = (int)xdim;
+    ptr = strtok(NULL, " ");
+    size_t ydim = (size_t) atoi(ptr);
+    *size_y = (int)ydim;
+
+    int i = 0, j = 0;
+    int **array = (int **) malloc(xdim * sizeof(int *));
+    for(i = 0; i < (int)xdim; i++)
+        array[i] = (int *) malloc(ydim * sizeof(int));
+
+    i = 0;
+    while ((read = getline(&line, &len, fp)) != -1) {
+        ptr = strtok(line, " ");
+        while(ptr != NULL){
+            array[i][j] = atoi(ptr);
+            j++;
+            ptr = strtok(NULL, " ");
         }
+        i++;
+        j = 0;
+    }
+
+    fclose(fp);
+    if(line) free(line);
+
+    return array;
 }

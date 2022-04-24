@@ -1,4 +1,5 @@
 #include "include/headers/utils.h"
+#include <limits.h>
 
 int main(int argc, char *argv[]){
     if(argc != 3){
@@ -17,32 +18,31 @@ int main(int argc, char *argv[]){
 
     int sum_filas[size_test[0]]; //para las distancias punto a punto
     int sum_total = 0; // para la distancia total
-    int distancias[(size_full[0]/size_test[0])*(size_full[1]/size_test[1])]; //para guardar por cada cuadradito (las sum total van aca adentro)
+    int min_distance = INT_MAX;
+    int x_min, y_min;
     
-    for(int i = 0; i < size_full[0]/size_test[0]; i++){
-        for(int j = 0; j < size_full[1]/size_test[1]; j++){
+    for(int i = 0; i <= size_full[0] - size_test[0]; i++){
+        for(int j = 0; j <= size_full[1] - size_test[1]; j++){
             sum_total = 0;
             for(int k = 0; k < size_test[0]; k++){//arranco cuadradito
                 sum_filas[k] = 0;
+                int x = k + i;
                 for(int l = 0; l < size_test[1]; l++){//arranco fila de cuadradito
-                    window[k][l] = arr_full[k + i*size_test[0]][l + j*size_test[1]];
-                    sum_filas[k] += (arr_test[k][l] - window[k][l])*(arr_test[k][l] - window[k][l]);
+                    window[k][l] = arr_full[x][l + j];
+                    int tmp = arr_test[k][l] - window[k][l];
+                    sum_filas[k] += tmp*tmp;
                 }
-                sum_total += sum_filas[i];
+                sum_total += sum_filas[k];
             }
-            distancias[i*(size_full[1]/size_test[1]) + j] = sum_total;
+            if(sum_total < min_distance){
+                min_distance = sum_total;
+                x_min = j;
+                y_min = i;
+            }
         }
     }
 
-    int min = distancias[0], minIndex = 0;
-    for(int i = 1; i<(size_full[0]/size_test[0])*(size_full[1]/size_test[1]); i++){
-        if(distancias[i]<min){
-            minIndex = i;
-            min = distancias[i];
-        }
-    }
-
-    printf("el min es distancias[%i]: %i \n",minIndex,min);
+    printf("x: %i y: %i min: %i\n", x_min, y_min, min_distance);
 
     for(int j = 0; j < size_full[0]; j++)
         free(arr_full[j]);

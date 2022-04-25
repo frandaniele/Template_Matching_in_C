@@ -5,7 +5,7 @@ void error(char *msj){
     exit(EXIT_FAILURE);
 }
 
-int **read_image_pixels(char * img_path, int *size_x, int *size_y){
+int **read_image_pixels(char * img_path, int *height, int *width){
     FILE * fp;
     char * line = NULL;
     size_t len = 0;
@@ -16,16 +16,16 @@ int **read_image_pixels(char * img_path, int *size_x, int *size_y){
 
     getline(&line, &len, fp);
     char *ptr = strtok(line, " ");
-    size_t xdim = (size_t) atoi(ptr);
-    *size_x = (int)xdim;
-    ptr = strtok(NULL, " ");
     size_t ydim = (size_t) atoi(ptr);
-    *size_y = (int)ydim;
+    *height = (int)ydim;
+    ptr = strtok(NULL, " ");
+    size_t xdim = (size_t) atoi(ptr);
+    *width = (int)xdim;
 
     int i = 0, j = 0;
-    int **array = (int **) malloc(xdim * sizeof(int *));
-    for(i = 0; i < (int)xdim; i++)
-        array[i] = (int *) malloc(ydim * sizeof(int));
+    int **array = (int **) malloc(ydim * sizeof(int *));
+    for(i = 0; i < (int)ydim; i++)
+        array[i] = (int *) malloc(xdim * sizeof(int));
 
     i = 0;
     while ((read = getline(&line, &len, fp)) != -1) {

@@ -7,32 +7,29 @@ int main(int argc, char *argv[]){
 		exit(EXIT_SUCCESS);
     }
 
-    int size_full[2];
+    int size_full[2]; // 0 -> height , 1 -> width
     int size_test[2];
 
     int **arr_full = read_image_pixels(argv[1], &size_full[0], &size_full[1]);
     int **arr_test = read_image_pixels(argv[2], &size_test[0], &size_test[1]);
 
     int window[size_test[0]][size_test[1]];
-    //int centro[2] = {size_test[0]/2, size_test[1]/2};
 
-    int sum_filas[size_test[0]]; //para las distancias punto a punto
-    int sum_total = 0; // para la distancia total
     int min_distance = INT_MAX;
     int x_min, y_min;
     
     for(int i = 0; i <= size_full[0] - size_test[0]; i++){
         for(int j = 0; j <= size_full[1] - size_test[1]; j++){
-            sum_total = 0;
+            int sum_total = 0; // para la distancia total
             for(int k = 0; k < size_test[0]; k++){//arranco cuadradito
-                sum_filas[k] = 0;
+                int sum_filas = 0;  //para las distancias punto a punto
                 int x = k + i;
                 for(int l = 0; l < size_test[1]; l++){//arranco fila de cuadradito
                     window[k][l] = arr_full[x][l + j];
                     int tmp = arr_test[k][l] - window[k][l];
-                    sum_filas[k] += tmp*tmp;
+                    sum_filas += tmp*tmp;
                 }
-                sum_total += sum_filas[k];
+                sum_total += sum_filas;
             }
             if(sum_total < min_distance){
                 min_distance = sum_total;

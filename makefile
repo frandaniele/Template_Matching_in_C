@@ -5,16 +5,19 @@ OPENMP = -fopenmp
 all: build_folders procedural distribuida
 
 procedural: src/procedural.c src/include/bodies/utils.c
-	$(CC) $(CFLAGS) $(OFLAGS) -o src/bin/procedural src/procedural.c src/include/bodies/utils.c
+	$(CC) $(CFLAGS) $(OFLAGS) -pg -o src/bin/procedural src/procedural.c src/include/bodies/utils.c
 
 distribuida: src/procedural.c src/include/bodies/utils.c
-	$(CC) $(CFLAGS) $(OFLAGS) -o src/bin/paralela src/parallel.c src/include/bodies/utils.c
+	$(CC) $(CFLAGS) $(OFLAGS) -pg -o src/bin/paralela src/parallel.c src/include/bodies/utils.c $(OPENMP)
 
 build_folders:
 	mkdir -p ./src/obj ./src/bin 
 
 cppcheck:
 	cppcheck --enable=all --suppress=missingIncludeSystem src/ 2>err.txt
+
+prueba: src/prueba.c
+	$(CC) -pg -o src/bin/prueba src/prueba.c $(OPENMP)
 
 clean:
 	rm -f -r ./src/bin ./src/obj /src/bin/* /src/obj/*

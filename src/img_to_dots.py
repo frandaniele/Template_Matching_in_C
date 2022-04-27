@@ -11,12 +11,12 @@ with open(sys.argv[2], 'w') as f:
      csv.writer(f, delimiter=' ').writerows(img)
 
 # Naming a window
-cv2.namedWindow("Resized_Window", cv2.WINDOW_NORMAL)
+#cv2.namedWindow("Resized_Window", cv2.WINDOW_NORMAL)
   
 # Using resizeWindow()
-cv2.resizeWindow("Resized_Window", 1000, 800)
+#cv2.resizeWindow("Resized_Window", 1000, 800)
   
 # Displaying the image
-cv2.imshow("Resized_Window", img)
-cv2.waitKey(0)
-cv2.destroyWindow('i')
+#cv2.imshow("Resized_Window", img)
+#cv2.waitKey(0)
+#cv2.destroyWindow('i')

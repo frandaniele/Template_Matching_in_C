@@ -18,10 +18,9 @@ int **read_image_pixels(char * img_path, int *height, int *width){
     size_t len = 0;
     ssize_t read;
 
-    if ((fp = fopen(img_path, "r")) == NULL)
-        error("fopen");
+    if ((fp = fopen(img_path, "r")) == NULL) error("fopen");
 
-    read = getline(&line, &len, fp);
+    if((read = getline(&line, &len, fp)) < 0) error("Read");
     char *ptr = strtok(line, " ");
     size_t ydim = (size_t) atoi(ptr);
     *height = (int)ydim;
@@ -53,23 +52,30 @@ int **read_image_pixels(char * img_path, int *height, int *width){
 }
 
 void template_matching(int **image, int **template, int height_width_image[], int height_width_template[]){
-    int window[height_width_template[0]][height_width_template[1]];
+    //int window[height_width_template[0]][height_width_template[1]];
 
     int min_distance = INT_MAX;
     int x_min, y_min;
     
-    for(int i = 0; i <= height_width_image[0] - height_width_template[0]; i++){
-        for(int j = 0; j <= height_width_image[1] - height_width_template[1]; j++){
+    int height_template = height_width_template[0]; 
+    int width_template = height_width_template[1]; 
+    int rows = height_width_image[0] - height_template; 
+    int columns = height_width_image[1] - width_template; 
+
+    for(int i = 0; i <= rows; i++){
+        for(int j = 0; j <= columns; j++){
             int sum_total = 0; // para la distancia total
-            for(int k = 0; k < height_width_template[0]; k++){//arranco cuadradito
+            for(int k = 0; k < height_template; k++){//arranco cuadradito
                 int sum_filas = 0;  //para las distancias punto a punto
-                int x = k + i;
-                for(int l = 0; l < height_width_template[1]; l++){//arranco fila de cuadradito
-                    window[k][l] = image[x][l + j];
-                    int tmp = template[k][l] - window[k][l];
+               // int x = k + i;
+                int *prefetch = image[k + i];
+                int *prefetch2 = template[k];
+                for(int l = 0; l < width_template; l++){//arranco fila de cuadradito
+                   // window[k][l] = image[x][l + j];
+                    int tmp = prefetch2[l] - prefetch[l + j];
                     sum_filas += tmp*tmp;
                 }
-                sum_total += sum_filas;
+                if((sum_total += sum_filas) >= min_distance) break;
             }
             if(sum_total < min_distance){
                 min_distance = sum_total;

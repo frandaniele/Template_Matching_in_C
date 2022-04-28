@@ -10,13 +10,21 @@ else
 fi
 
 TIMEFORMAT=%R
-
-echo "procedural:"
-time ./src/bin/procedural original.txt test.txt > proceduralresult.txt
-gprof ./src/bin/procedural gmon.out > proceduralprof.txt
-
-if [ $2 = "full" ]
+if [ $2 = "S" ]
 then
+    echo "procedural:"
+    time ./src/bin/procedural original.txt test.txt > proceduralresult.txt
+    gprof ./src/bin/procedural gmon.out > proceduralprof.txt
+elif [ $2 = "P" ]
+then
+    echo "parallel:"
+    time ./src/bin/paralela original.txt test.txt > parallelresult.txt
+    gprof ./src/bin/paralela gmon.out > paralelaprof.txt
+else
+    echo "procedural:"
+    time ./src/bin/procedural original.txt test.txt > proceduralresult.txt
+    gprof ./src/bin/procedural gmon.out > proceduralprof.txt
+    
     echo "parallel:"
     time ./src/bin/paralela original.txt test.txt > parallelresult.txt
     gprof ./src/bin/paralela gmon.out > paralelaprof.txt

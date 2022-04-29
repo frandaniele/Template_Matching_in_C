@@ -28,22 +28,28 @@ int **read_image_pixels(char * img_path, int *height, int *width){
     size_t xdim = (size_t) atoi(ptr);
     *width = (int)xdim;
 
-    int i = 0, j = 0;
+  //  int i = 0, j = 0;
     int **array = (int **) malloc(ydim * sizeof(int *));
-    for(i = 0; i < (int)ydim; i++)
+    for(int i = 0; i < (int)ydim; i++)
         array[i] = (int *) malloc(xdim * sizeof(int));
 
-    i = 0;
-    while ((read = getline(&line, &len, fp)) != -1) {
-        ptr = strtok(line, " ");
-        while(ptr != NULL){
-            array[i][j] = atoi(ptr);
-            j++;
-            ptr = strtok(NULL, " ");
+   // #pragma omp parallel num_threads (4) private(read)
+ //   {
+      //  #pragma omp for nowait ordered schedule(dynamic, 16)
+        for(int i = 0; i < *height; i++){
+       //     #pragma omp ordered
+       //     {
+                if((read = getline(&line, &len, fp)) == -1) i = *height;
+         //   }
+            int j = 0;
+            char* token = strtok(line, " ");
+            while(token){
+                array[i][j] = atoi(token);
+                j++;
+                token = strtok(NULL, " ");
+            }
         }
-        i++;
-        j = 0;
-    }
+  //  }
 
     fclose(fp);
     if(line) free(line);
@@ -62,10 +68,10 @@ void template_matching_parallel(int **image, int **template, int height_width_im
     int rows = height_width_image[0] - height_template; 
     int columns = height_width_image[1] - width_template; 
 
-    #pragma omp parallel num_threads(1) 
+    #pragma omp parallel num_threads(4) 
     {
+        #pragma omp for nowait schedule(dynamic, 256)
         for(int i = 0; i <= rows; i++){
-            #pragma omp for nowait schedule(dynamic, 256)
             for(int j = 0; j <= columns; j++){
                 int sum_total = 0; // para la distancia total
                 for(int k = 0; k < height_template; k++){//arranco cuadradito

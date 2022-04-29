@@ -3,7 +3,7 @@ CFLAGS = -Wall -Werror -Wextra -Wconversion -pedantic -std=gnu11
 OPENMP = -fopenmp
 DEBUG = -g
 
-all: build_folders procedural distribuida ambos
+all: build_folders procedural distribuida
 
 procedural: src/procedural.c 
 	$(CC) $(CFLAGS) $(DEBUG) -o src/bin/procedural src/procedural.c $(OPENMP)

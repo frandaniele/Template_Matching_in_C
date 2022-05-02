@@ -7,6 +7,17 @@
 #include <limits.h>
 #include <omp.h>
 
+int naive(const char *p) {
+    int x = 0;
+    
+    while (*p >= '0' && *p <= '9') {
+        x = (x*10) + (*p - '0');
+        ++p;
+    }
+
+    return x;
+}
+
 void error(char *msj){
     perror(msj);
     exit(EXIT_FAILURE);
@@ -28,21 +39,19 @@ int **read_image_pixels(char * img_path, int *height, int *width){
     size_t xdim = (size_t) atoi(ptr);
     *width = (int)xdim;
 
-    int i = 0, j = 0;
     int **array = (int **) malloc(ydim * sizeof(int *));
-    for(i = 0; i < (int)ydim; i++)
+    for(int i = 0; i < (int)ydim; i++)
         array[i] = (int *) malloc(xdim * sizeof(int));
 
-    i = 0;
-    while ((read = getline(&line, &len, fp)) != -1) {
-        ptr = strtok(line, " ");
-        while(ptr != NULL){
-            array[i][j] = atoi(ptr);
+    for(int i = 0; i < *height; i++){
+        if((read = getline(&line, &len, fp)) == -1) i = *height;
+        int j = 0;
+        char* token = strtok(line, " ");
+        while(token){
+            array[i][j] = naive(token);
             j++;
-            ptr = strtok(NULL, " ");
+            token = strtok(NULL, " ");
         }
-        i++;
-        j = 0;
     }
 
     fclose(fp);
@@ -84,8 +93,10 @@ void template_matching(int **image, int **template, int height_width_image[], in
             }
         }
     }
-
-    printf("x: %i y: %i min: %i\n", x_min, y_min, min_distance);
+    
+    printf("Valor del minimo encontrado: %i, con la", min_distance);
+    printf(" esquina superior izquierda en (%i, %i) y de", x_min, y_min);
+    printf(" dimension %ix%i.\n", width_template, height_template);
 }
 
 int main(int argc, char *argv[]){
@@ -106,7 +117,7 @@ int main(int argc, char *argv[]){
     template_matching(arr_full, arr_test, size_full, size_test);
     proc_time = omp_get_wtime() - proc_time;
 
-    printf("procedural time: %f\n", proc_time);
+    printf("\nTiempo de ejecución: %f\n", proc_time);
 
     for(int j = 0; j < size_full[0]; j++)
         free(arr_full[j]);

@@ -7,6 +7,17 @@
 #include <limits.h>
 #include <omp.h>
 
+int naive(const char *p) {
+    int x = 0;
+    
+    while (*p >= '0' && *p <= '9') {
+        x = (x*10) + (*p - '0');
+        ++p;
+    }
+
+    return x;
+}
+
 void error(char *msj){
     perror(msj);
     exit(EXIT_FAILURE);
@@ -28,29 +39,28 @@ int **read_image_pixels(char * img_path, int *height, int *width){
     size_t xdim = (size_t) atoi(ptr);
     *width = (int)xdim;
 
-  //  int i = 0, j = 0;
     int **array = (int **) malloc(ydim * sizeof(int *));
     for(int i = 0; i < (int)ydim; i++)
         array[i] = (int *) malloc(xdim * sizeof(int));
-
-   // #pragma omp parallel num_threads (4) private(read)
- //   {
-      //  #pragma omp for nowait ordered schedule(dynamic, 16)
+        
+    #pragma omp parallel num_threads (4) private(read)
+    {
+        #pragma omp for nowait ordered schedule(static)
         for(int i = 0; i < *height; i++){
-       //     #pragma omp ordered
-       //     {
+            #pragma omp ordered
+            {
                 if((read = getline(&line, &len, fp)) == -1) i = *height;
-         //   }
+            }
             int j = 0;
             char* token = strtok(line, " ");
             while(token){
-                array[i][j] = atoi(token);
+                array[i][j] = naive(token);
                 j++;
                 token = strtok(NULL, " ");
             }
         }
-  //  }
-
+    }
+   
     fclose(fp);
     if(line) free(line);
 
@@ -77,11 +87,11 @@ void template_matching_parallel(int **image, int **template, int height_width_im
                 for(int k = 0; k < height_template; k++){//arranco cuadradito
                     int sum_filas = 0;  //para las distancias punto a punto
                    // int x = k + i;
-                    int *prefetch = image[k + i];
-                    int *prefetch2 = template[k];
+                    int *image_row = image[k + i];
+                    int *template_row = template[k];
                     for(int l = 0; l < width_template; l++){//arranco fila de cuadradito
                        // window[k][l] = image[x][l + j];
-                        int tmp = prefetch2[l] - prefetch[l + j];
+                        int tmp = template_row[l] - image_row[l + j];
                         sum_filas += tmp*tmp;
                     }
                     if((sum_total += sum_filas) >= min_distance) break;
@@ -98,7 +108,9 @@ void template_matching_parallel(int **image, int **template, int height_width_im
         }
     }
 
-    printf("x: %i y: %i min: %i\n", x_min, y_min, min_distance);
+    printf("Valor del minimo encontrado: %i, con la", min_distance);
+    printf(" esquina superior izquierda en (%i, %i) y de", x_min, y_min);
+    printf(" dimension %ix%i.\n", width_template, height_template);
 }
 
 int main(int argc, char *argv[]){
@@ -119,7 +131,7 @@ int main(int argc, char *argv[]){
     template_matching_parallel(arr_full, arr_test, size_full, size_test);
     parallel_time = omp_get_wtime() - parallel_time;
 
-    printf("parallel time: %f\n", parallel_time);
+    printf("\nTiempo de ejecución: %f\n", parallel_time);
 
     for(int j = 0; j < size_full[0]; j++)
         free(arr_full[j]);

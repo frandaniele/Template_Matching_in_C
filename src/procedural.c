@@ -77,11 +77,11 @@ void template_matching(int **image, int **template, int height_width_image[], in
             for(int k = 0; k < height_template; k++){//arranco cuadradito
                 int sum_filas = 0;  //para las distancias punto a punto
                // int x = k + i;
-                int *prefetch = image[k + i];
-                int *prefetch2 = template[k];
+                int *image_row = image[k + i];
+                int *template_row = template[k];
                 for(int l = 0; l < width_template; l++){//arranco fila de cuadradito
                    // window[k][l] = image[x][l + j];
-                    int tmp = prefetch2[l] - prefetch[l + j];
+                    int tmp = template_row[l] - image_row[l + j];
                     sum_filas += tmp*tmp;
                 }
                 if((sum_total += sum_filas) >= min_distance) break;

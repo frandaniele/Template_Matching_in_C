@@ -78,9 +78,9 @@ void template_matching_parallel(int **image, int **template, int height_width_im
     int rows = height_width_image[0] - height_template; 
     int columns = height_width_image[1] - width_template; 
 
-    #pragma omp parallel num_threads(4) 
+    #pragma omp parallel num_threads(32) 
     {
-        #pragma omp for nowait schedule(dynamic, 256)
+        #pragma omp for nowait schedule(dynamic, 128)
         for(int i = 0; i <= rows; i++){
             for(int j = 0; j <= columns; j++){
                 int sum_total = 0; // para la distancia total
